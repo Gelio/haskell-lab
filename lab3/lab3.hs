@@ -37,3 +37,10 @@ quickSort' (pivot:xs) = smaller ++ pivot:larger
   where
     smaller = quickSort' $ filter (<= pivot) xs
     larger = quickSort' $ filter (> pivot) xs
+
+-- 5
+isDescending :: (Ord a) => [a] -> Bool
+isDescending [] = True
+isDescending (head:tail) = not $ fst $ foldl foldingFn (False, head) tail
+  where
+    foldingFn (hasFailed, prev) x = if hasFailed then (hasFailed, x) else (prev <= x, x)
