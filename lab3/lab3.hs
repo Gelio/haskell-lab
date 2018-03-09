@@ -44,3 +44,8 @@ isDescending [] = True
 isDescending (head:tail) = not $ fst $ foldl foldingFn (False, head) tail
   where
     foldingFn (hasFailed, prev) x = if hasFailed then (hasFailed, x) else (prev <= x, x)
+
+-- 6
+powersOfTen = 1:[10 * xx | xx <- powersOfTen]
+sumDecimal :: [Int] -> Int
+sumDecimal digits = sum $ zipWith (\x power -> x * power) (reverse digits) powersOfTen
