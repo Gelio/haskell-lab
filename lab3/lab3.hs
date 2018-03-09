@@ -29,3 +29,11 @@ pi'' n = (4*)
 
 -- 3
 task3 = (take 1 $ [x | x <- [100000,99999..], x `mod` 3829 == 0])!!0
+
+-- 4
+quickSort' :: (Ord a) => (Eq a) => [a] -> [a]
+quickSort' [] = []
+quickSort' (pivot:xs) = smaller ++ pivot:larger
+  where
+    smaller = quickSort' $ filter (<= pivot) xs
+    larger = quickSort' $ filter (> pivot) xs
