@@ -85,3 +85,16 @@ numbValue = numbValueRec 0
       where sum' = sum + 1
 
 -- 9
+myFoldl :: (b -> a -> b) -> b -> [a] -> b
+myFoldl _ acc [] = acc
+myFoldl f acc (x:xs) = myFoldl f acc' xs
+  where acc' = f acc x
+
+myFoldl' :: (b -> a -> b) -> b -> [a] -> b
+myFoldl' _ acc [] = acc
+myFoldl' f acc (x:xs) = acc' `seq` myFoldl' f acc' xs
+  where acc' = f acc x
+
+myFoldr :: (a -> b -> b) -> b -> [a] -> b
+myFoldr _ acc [] = acc
+myFoldr f acc (x:xs) = f x $ myFoldr f acc xs
