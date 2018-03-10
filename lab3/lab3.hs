@@ -49,3 +49,39 @@ isDescending (head:tail) = not $ fst $ foldl foldingFn (False, head) tail
 powersOfTen = 1:[10 * xx | xx <- powersOfTen]
 sumDecimal :: [Int] -> Int
 sumDecimal digits = sum $ zipWith (\x power -> x * power) (reverse digits) powersOfTen
+
+-- 7
+sieve :: Int -> [Int] -> [Int]
+sieve n ns = filter (notDivBy n) ns
+  where
+    notDivBy n k = (k `mod` n) /= 0
+
+eratos :: [Int] -> [Int]
+eratos [] = []
+eratos (n:ns) = n : (eratos $ sieve n ns)
+
+primes :: [Int]
+primes = eratos [2..]
+
+-- 8
+data Numb = Zero | Succ Numb
+
+instance Show Numb where
+  show Zero = ""
+  show (Succ numb) = "0" ++ show numb
+
+
+data Numb' = Zero' | Succ' Numb'
+
+instance Show Numb' where
+  show numb' = show $ numbValue numb'
+
+numbValue :: Numb' -> Int
+numbValue = numbValueRec 0
+  where 
+    numbValueRec :: Int -> Numb' -> Int
+    numbValueRec sum Zero' = sum
+    numbValueRec sum (Succ' numb) = numbValueRec sum' (seq sum' numb)
+      where sum' = sum + 1
+
+-- 9
