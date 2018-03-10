@@ -98,3 +98,7 @@ myFoldl' f acc (x:xs) = acc' `seq` myFoldl' f acc' xs
 myFoldr :: (a -> b -> b) -> b -> [a] -> b
 myFoldr _ acc [] = acc
 myFoldr f acc (x:xs) = f x $ myFoldr f acc xs
+
+-- 10
+myFilter :: (Eq a) => (a -> Bool) -> [a] -> [a]
+myFilter f list = foldr (\x acc -> if f x then x:acc else acc) [] list
