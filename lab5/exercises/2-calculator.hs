@@ -2,19 +2,22 @@ module Main where
 
   main :: IO ()
   main = do
-    op <- readOperation
-    arg1 <- readNumber
-    arg2 <- readNumber
-    putStrLn $ op arg1 arg2
+    opChar <- getLine
+    op <- return $ readOperationMaybe opChar
+    arg1 <- readDouble
+    arg2 <- readDouble
+    putStrLn $ show $ do
+      op1 <- op
+      return $ op1 arg1 arg2
 
-  readNumber :: (Num a) => Maybe a
-  readNumber = getLine >>= read
 
-  readOperation :: (Num a) => String -> Maybe (a -> a -> a)
-  readOperation op
+  readDouble :: IO Double
+  readDouble = readLn
+
+  readOperationMaybe :: String -> Maybe (Double -> Double -> Double)
+  readOperationMaybe op
     | op == "*" = Just (*)
     | op == "+" = Just (+)
     | op == "-" = Just (-)
     | op == "/" = Just (/)
-    | op == "mod" = Just (mod)
     | otherwise = Nothing
