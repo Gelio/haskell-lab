@@ -26,6 +26,10 @@ findByPrefix :: Name -> StIO [(Name, Phone)]
 findByPrefix prefix =
   fmap (filter (\(n,_) -> isPrefixOf prefix n) . M.toAscList)  get
 
+removePerson :: Name -> StIO ()
+removePerson name = modify' (\m -> M.delete name m)
+
+
 ask :: String -> StIO String
 ask prompt = lift (putStrLn prompt >> getLine)
 
@@ -38,10 +42,14 @@ storePhoneCommand = do
 findPhoneCommand :: StIO ()
 findPhoneCommand = ask "Name prefix?" >>= findByPrefix >>= lift . print
 
+deletePhoneCommand :: StIO ()
+deletePhoneCommand = ask "Name?" >>= removePerson
+
 commands :: M.Map String (StIO Bool)
 commands = M.fromList [
   ("add", storePhoneCommand >> return True),
   ("find", findPhoneCommand >> return True),
+  ("remove", deletePhoneCommand >> return True),
   ("exit", return False)
  ]
 
