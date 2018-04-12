@@ -18,18 +18,19 @@ type TaskName = String
 type Priority = Int
 data Task = Task TaskName Priority
 -- i skrócenia zapisu
-type StIO a = StateT (P.PSQ TaskName Priority) IO a
+type PQueue = P.PSQ TaskName Priority
+type StIO a = StateT PQueue IO a
 
-instance Ord Task where
-  (Task name1 p1) `compare` (Task name2 p2)
-    | pOrdering == EQ = name1 `compare` name2
-    | otherwise = pOrdering
-    where
-      pOrdering = p1 `compare` p2
+-- instance Ord Task where
+--   (Task name1 p1) `compare` (Task name2 p2)
+--     | pOrdering == EQ = name1 `compare` name2
+--     | otherwise = pOrdering
+--     where
+--       pOrdering = p1 `compare` p2
 
 
 -- funkcje pomocnicze operujące na zapisanych numerach
-addTask :: TaskName -> Priority-> StIO ()
+addTask :: TaskName -> Priority -> StIO ()
 addTask name priority = modify' (P.insert name priority)
 
 getTask :: StIO (Maybe TaskName)
@@ -41,11 +42,18 @@ ask prompt = lift (putStrLn prompt >> getLine)
 readInt :: String -> Maybe Int
 readInt = readMaybe
 
+readPriority :: String -> Maybe Priority
+readPriority = readInt
+
 addTaskCommand :: StIO ()
 addTaskCommand = do
   name <- ask "Task name?"
-  priority <- ask "Priority?" >>= lift . readInt
-  addTask name priority
+  priority <- ask "Priority?"
+  lift $ readPriority priority >>= addTask name
+  -- lift (readPriority priority) >>= \priority -> addTask name priority >> return ()
+  return $ putStrLn $ "Added task: " ++ name
+  return ()
+
 
 commands :: M.Map String (StIO Bool)
 commands = M.fromList [
