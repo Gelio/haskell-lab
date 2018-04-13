@@ -45,19 +45,35 @@ readInt = readMaybe
 readPriority :: String -> Maybe Priority
 readPriority = readInt
 
+putStrLnStIO :: String -> StIO ()
+putStrLnStIO = lift . putStrLn
+
 addTaskCommand :: StIO ()
 addTaskCommand = do
   name <- ask "Task name?"
   priority <- ask "Priority?"
-  lift $ readPriority priority >>= addTask name
-  -- lift (readPriority priority) >>= \priority -> addTask name priority >> return ()
-  return $ putStrLn $ "Added task: " ++ name
-  return ()
+  maybe (putStrLnStIO "The priority must be an integer") (\p -> addTask name p >> putStrLnStIO "Task added") (readPriority priority)
 
+displayEmptyQueueMessage :: StIO ()
+displayEmptyQueueMessage = putStrLnStIO "The tasklist is empty"
+
+printTaskName :: TaskName -> StIO ()
+printTaskName taskName = putStrLnStIO $ "Top task: " ++ taskName
+
+peekCommand :: StIO ()
+peekCommand = getTask >>= maybe displayEmptyQueueMessage printTaskName
+
+removeTopTask :: StIO ()
+removeTopTask = modify' P.deleteMin
+
+popCommand :: StIO ()
+popCommand = getTask >>= maybe displayEmptyQueueMessage (\taskName -> removeTopTask >> printTaskName taskName)
 
 commands :: M.Map String (StIO Bool)
 commands = M.fromList [
   ("add", addTaskCommand >> return True),
+  ("peek", peekCommand >> return True),
+  ("pop", popCommand >> return True),
   ("exit", return False)
   ]
 
