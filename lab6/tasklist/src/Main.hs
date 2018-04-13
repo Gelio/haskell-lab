@@ -66,14 +66,14 @@ peekCommand = getTask >>= maybe displayEmptyQueueMessage printTaskName
 removeTopTask :: StIO ()
 removeTopTask = modify' P.deleteMin
 
-popCommand :: StIO ()
-popCommand = getTask >>= maybe displayEmptyQueueMessage (\taskName -> removeTopTask >> printTaskName taskName)
+popCommand :: StIO Bool
+popCommand = getTask >>= maybe (displayEmptyQueueMessage >> return False) (\taskName -> removeTopTask >> printTaskName taskName >> return True)
 
 commands :: M.Map String (StIO Bool)
 commands = M.fromList [
   ("add", addTaskCommand >> return True),
   ("peek", peekCommand >> return True),
-  ("pop", popCommand >> return True),
+  ("pop", popCommand),
   ("exit", return False)
   ]
 
