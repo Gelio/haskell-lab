@@ -16,25 +16,16 @@ import qualified Data.PSQueue as P
 -- aliasy typów do poprawy czytelności
 type TaskName = String
 type Priority = Int
-data Task = Task TaskName Priority
 -- i skrócenia zapisu
 type PQueue = P.PSQ TaskName Priority
 type StIO a = StateT PQueue IO a
 
--- instance Ord Task where
---   (Task name1 p1) `compare` (Task name2 p2)
---     | pOrdering == EQ = name1 `compare` name2
---     | otherwise = pOrdering
---     where
---       pOrdering = p1 `compare` p2
 
-
--- funkcje pomocnicze operujące na zapisanych numerach
 addTask :: TaskName -> Priority -> StIO ()
 addTask name priority = modify' (P.insert name priority)
 
 getTask :: StIO (Maybe TaskName)
-getTask = gets (\p -> P.findMin p >>= return . P.key)
+getTask = gets (\q -> P.key <$> P.findMin q)
 
 ask :: String -> StIO String
 ask prompt = lift (putStrLn prompt >> getLine)
@@ -97,14 +88,3 @@ main :: IO ()
 main = do
   execStateT mainLoop P.empty
   return ()
--- main = do
---   (file:_) <- getArgs
---   initialMap <- catchIOError (do
---         m <- read <$!> (readFile file)
---         print m
---         return m
---     ) (\ex -> if isDoesNotExistError ex then return M.empty else ioError ex)
-
---   finalMap <- execStateT mainLoop initialMap
---   writeFile file $ show finalMap
-
