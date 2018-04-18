@@ -38,4 +38,17 @@ findMaxIndependentVertexSet g = fst $ foldl largerVertexSet ([], 0) $ map listWi
         else
           s2
 
+step' :: Graph -> [Vertex] -> [Vertex] -> ListT (State [Vertex]) ()
+step' _ independent [] = do
+  currentBest <- lift get
+  if length currentBest >= length independent
+    then
+      return ()
+    else
+      lift $ put $ independent
+step' g independent (v:vs) =
+  ListT (return $ step g independent [v]) >>= \independent' -> step' g independent' vs
 
+
+findMaxIndependentVertexSet' :: Graph -> [Vertex]
+findMaxIndependentVertexSet' g = execState (runListT $ step' g [] (vertices g)) []
