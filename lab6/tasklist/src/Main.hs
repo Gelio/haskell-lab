@@ -25,7 +25,7 @@ addTask :: TaskName -> Priority -> StIO ()
 addTask name priority = modify' (P.insert name priority)
 
 getTask :: StIO (Maybe TaskName)
-getTask = gets (\q -> P.key <$> P.findMin q)
+getTask = gets (fmap P.key . P.findMin)
 
 ask :: String -> StIO String
 ask prompt = lift (putStrLn prompt >> getLine)
@@ -69,7 +69,7 @@ commands = M.fromList [
   ]
 
 unknownCommand :: StIO Bool
-unknownCommand = (lift $ putStrLn "Unknown command") >> return True
+unknownCommand = lift (putStrLn "Unknown command") >> return True
 
 processCommand :: String -> StIO Bool
 processCommand cmd = M.findWithDefault unknownCommand cmd commands
@@ -80,9 +80,7 @@ readCommand = lift getLine >>= processCommand
 mainLoop :: StIO ()
 mainLoop = do
   result <- readCommand
-  if result
-    then mainLoop
-    else return ()
+  when result mainLoop
 
 main :: IO ()
 main = do

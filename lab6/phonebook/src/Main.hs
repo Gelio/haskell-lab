@@ -20,14 +20,14 @@ type StIO a = StateT (M.Map Name Phone) IO a
 
 -- funkcje pomocnicze operujące na zapisanych numerach
 storePhone :: Name -> Phone -> StIO ()
-storePhone name phone = modify' (\m -> M.insert name phone m)
+storePhone name phone = modify' (M.insert name phone)
 
 findByPrefix :: Name -> StIO [(Name, Phone)]
 findByPrefix prefix =
   fmap (filter (\(n,_) -> isPrefixOf prefix n) . M.toAscList)  get
 
 removePerson :: Name -> StIO ()
-removePerson name = modify' (\m -> M.delete name m)
+removePerson name = modify' (M.delete name)
 
 
 ask :: String -> StIO String
@@ -54,7 +54,7 @@ commands = M.fromList [
  ]
 
 unknownCommand :: StIO Bool
-unknownCommand = (lift $ putStrLn "Unknown command") >> return True
+unknownCommand = lift (putStrLn "Unknown command") >> return True
 
 processCommand :: String -> StIO Bool
 processCommand cmd = M.findWithDefault unknownCommand cmd commands
@@ -65,15 +65,13 @@ readCommand = lift getLine >>= processCommand
 mainLoop :: StIO ()
 mainLoop = do
   result <- readCommand
-  if result
-    then mainLoop
-    else return ()
+  when result mainLoop
 
 main :: IO ()
 main = do
   (file:_) <- getArgs
   initialMap <- catchIOError (do
-        m <- read <$!> (readFile file)
+        m <- read <$!> readFile file
         print m
         return m
     ) (\ex -> if isDoesNotExistError ex then return M.empty else ioError ex)

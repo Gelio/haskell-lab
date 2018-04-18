@@ -45,7 +45,7 @@ step' _ independent [] = do
     then
       return ()
     else
-      lift $ put $ independent
+      lift $ put independent
 step' g independent (v:vs) =
   ListT (return $ step g independent [v]) >>= \independent' -> step' g independent' vs
 

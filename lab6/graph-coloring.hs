@@ -13,7 +13,7 @@ type Color = Int
 type AllowedColors = Seq [Color]
 
 assignColor :: Graph -> Vertex -> Color -> AllowedColors -> AllowedColors
-assignColor gr vertex color allowed = foldl' (\allow v -> adjust removeColor v allow) allowed vToRemColor
+assignColor gr vertex color allowed = foldl' (flip $ adjust removeColor) allowed vToRemColor
   where
     vToRemColor = gr!vertex
     removeColor = filter (/=color)
@@ -21,7 +21,7 @@ assignColor gr vertex color allowed = foldl' (\allow v -> adjust removeColor v a
 colorGraph :: Graph -> Color -> [[Color]]
 colorGraph graph numColors = colorGraph' (vertices graph) allowedColors
   where
-    allowedColors = Sequence.replicate (length $ vertices graph) $ [1..numColors]
+    allowedColors = Sequence.replicate (length $ vertices graph) [1..numColors]
     colorGraph' :: [Vertex] -> AllowedColors -> [[Color]]
     colorGraph' [] _ = return []
     colorGraph' (vertex:vs) allowed = do
