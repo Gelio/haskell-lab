@@ -6,10 +6,10 @@ import Control.Monad.Trans.Class
 import Data.Graph
 
 containsAny :: Ord a => [a] -> [a] -> Bool
-a `containsAny` b = foldl (||) False $ map (`elem` a) b
+a `containsAny` b = any (`elem` a) b
 
 isIndependent :: Graph -> [Vertex] -> Vertex -> Bool
-isIndependent g independent vertex = not $ (reachable g vertex) `containsAny` independent
+isIndependent g independent vertex = not $ reachable g vertex `containsAny` independent
 
 step :: Graph -> [Vertex] -> [Vertex] -> [[Vertex]]
 step g independent [] = [independent]
