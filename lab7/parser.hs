@@ -54,8 +54,13 @@ ensureChar c = readChar >>= (\d -> if c == d then return d else failure)
 ensureMatching :: String -> Parser Char
 ensureMatching set = readChar >>= (\d -> if d `elem` set  then return d else failure)
 
+-- readMatching :: String -> Parser String
+-- readMatching set = some $ ensureMatching set
+
 readMatching :: String -> Parser String
-readMatching set = some $ ensureMatching set
+readMatching set = do
+  c <- ensureMatching set
+  (readMatching set >>= return . (c:)) <|> return [c]
 
 eatChars :: String -> Parser ()
 eatChars set = void $ many $ ensureMatching set
