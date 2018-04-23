@@ -75,8 +75,19 @@ readDoubleList = do
   rest <- (ensureChar ',' >> readDoubleList) <|> return []
   return (n:rest)
 
+-- Allows empty list
+readDoubleList' :: Parser [Double]
+readDoubleList' = readDoubleList <|> return []
+
 readDoubleListRows :: Parser [[Double]]
 readDoubleListRows = do
   row <- readDoubleList
   rest <- (ensureChar '\n' >> readDoubleListRows) <|> return []
+  return (row:rest)
+
+-- Allows empty rows
+readDoubleListRows' :: Parser [[Double]]
+readDoubleListRows' = do
+  row <- readDoubleList'
+  rest <- (ensureChar '\n' >> readDoubleListRows') <|> return []
   return (row:rest)
