@@ -1,5 +1,5 @@
 {-# OPTIONS -Wall #-}
-module Parser where
+module Parser (readJSONVal, readJSONFile, run, runEnsureConsumeAll, parse) where
 
 import Control.Applicative
 import Control.Monad
@@ -94,6 +94,28 @@ readDouble = do
 readString :: Parser String
 readString = ensureChar '"' >> readUntil '"'
 
+readString' :: Parser String
+readString' = do
+  _ <- ensureChar '"'
+  inside <- readStringInside
+  return inside
+
+  where
+    readStringInside = do
+      c <- readChar
+      if c == '\\' then
+        do
+          anotherC <- readChar
+          if anotherC == '"' then
+            readStringInside >>= \rest -> return ('"':rest)
+          else
+            readStringInside
+      else if c == '"' then
+        return ""
+      else
+        readStringInside >>= \rest -> return (c:rest)
+
+
 readBool :: Parser Bool
 readBool = readTrue <|> readFalse
   where
@@ -110,7 +132,7 @@ readDoubleVal :: Parser JSONVal
 readDoubleVal = DoubleVal <$> readDouble
 
 readStringVal :: Parser JSONVal
-readStringVal = StringVal <$> readString
+readStringVal = StringVal <$> readString'
 
 readBoolVal :: Parser JSONVal
 readBoolVal = BoolVal <$> readBool
@@ -145,7 +167,7 @@ readObjectVal = do
     readObjectVal' :: ObjectMap -> Parser JSONVal
     readObjectVal' m = do
       eatWhitespace
-      key <- readString
+      key <- readString'
       eatWhitespace
       _ <- ensureChar ':'
       eatWhitespace
@@ -158,3 +180,6 @@ readObjectVal = do
 
 readJSONVal :: Parser JSONVal
 readJSONVal = readDoubleVal <|> readStringVal <|> readBoolVal <|> readNullVal <|> readArrayVal <|> readObjectVal
+
+readJSONFile :: FilePath -> IO (Maybe JSONVal)
+readJSONFile path = readFile path >>= return . run readJSONVal
